@@ -1,0 +1,68 @@
+{% extends 'layout.html' %}
+
+{% set active_page = 'dashboard' -%}
+
+{% block title %}Панель управления{% endblock %}
+
+{% block body %}
+    <h1 class="display-6">Панель управления сайтом</h1>
+    <p class="lead mb-4">Выберите раздел для управления:</p>
+    <div class="row row-cols-3">
+
+        <div class="col">
+            <div class="card p-3">
+                <div class="card-body">
+                    <i class="fas fa-users-cog fa-5x mb-4"></i>
+                    <h5 class="card-title">Администраторы</h5>
+                    <p class="card-text text-secondary fw-light">Здесь вы можете добавить нового администратора, а также
+                        удалить существующего</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a class="text-decoration-none" href="{{ url_for('all_admins') }}">Список
+                            администраторов</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a class="text-decoration-none" href="{{ url_for('register_admin') }}">Создать
+                            администратора</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card p-3">
+                <div class="card-body">
+                    <i class="fas fa-users fa-5x mb-4"></i>
+                    <h5 class="card-title">Пользователи</h5>
+                    <p class="card-text text-secondary fw-light">Здесь можно просмотреть зарегистрировавшихся
+                        пользователей и результаты их
+                        опросов</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a class="text-decoration-none" href="{{ url_for('users') }}">Список пользователей</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card p-3">
+                <div class="card-body">
+                    <i class="fas fa-poll fa-5x mb-4"></i>
+                    <h5 class="card-title">Опросы</h5>
+                    <p class="card-text text-secondary fw-light">Создание, изменение и удаление опросов</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a class="text-decoration-none" href="{{ url_for('all_surveys') }}">Список опросов</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a class="text-decoration-none" href="{{ url_for('add_survey') }}">Создать опрос</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}

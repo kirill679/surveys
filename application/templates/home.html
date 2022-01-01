@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% set active_page = 'home' -%}
+
+{% block title %}Главная{% endblock %}
+
+{% block body %}
+    <div class="bg-light p-5 rounded-lg m-3">
+        <h1 class="display-4 mb-5">Добро пожаловать на главную страницу!</h1>
+
+        {% if 'logged_in' in session %}
+            <p class="lead">Вы авторизованы</p>
+            <p class="lead">Нажмите на кнопку ниже, чтобы выйти из аккаунта</p>
+            <a class="btn btn-danger btn-lg" href="{{ url_for('logout') }}">Выйти</a>
+        {% else %}
+            <p class="lead">На этом сайте вы можете пройти опрос и зарегистрироваться.</p>
+            <p class="lead">Ссылку на опрос вы можете получить у администратора. Также вы можете перейти к опросу, введя
+                его
+                номер на <a class="text-decoration-none" href="{{ url_for('register') }}">странице регистрации</a>.</p>
+            <p class="lead">Если у вас есть аккаунт администратора, то можете <a class="text-decoration-none"
+                                                                                 href="{{ url_for('login') }}">зайти в
+                него</a>. Тогда вам будет доступна панель
+                управления сайтом.</p>
+        {% endif %}
+    </div>
+{% endblock %}

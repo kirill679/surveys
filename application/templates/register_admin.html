@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% set active_page = 'dashboard' -%}
+
+{% block title %}Регистрация администратора{% endblock %}
+
+{% block body %}
+    {% from '/includes/_formhelpers.html' import render_field %}
+    <div class="row d-flex justify-content-center mt-5">
+        <div class="col-6">
+            <div class="card">
+                <form action="" method="POST" autocomplete="off" class="needs-validation p-5" novalidate>
+                    <h1 class="mb-4 display-6">Регистрация администратора</h1>
+
+                    {{ render_field(form.name) }}
+                    {{ render_field(form.email) }}
+                    {{ render_field(form.password) }}
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary mt-3" type="submit">Зарегистрировать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,320 @@
+{% extends 'layout.html' %}
+
+{% set active_page = 'dashboard' -%}
+
+{% block title %}Создать опрос{% endblock %}
+
+{% block body %}
+    <h1 class="display-6 mb-3">Создание опроса</h1>
+    <ul class="list-unstyled fs-5 fw-light">
+        <li>Придумайте название опроса</li>
+        <li>Нажмите на кнопку "Добавить вопрос", чтобы создать вопрос</li>
+        <li>Если вопрос обязательный, отметьте его слева галочкой</li>
+        <li>Добавьте адреса пользователей, которым будет доступен опрос</li>
+        <li>Выберите, будет ли опрос доступен для прохождения</li>
+    </ul>
+    <hr>
+
+    <div class="row">
+        <div class="col-10">
+            <form
+                    action=""
+                    method="POST"
+                    autocomplete="off"
+                    id="surveyForm"
+                    class="mt-4"
+            >
+                {# Название опроса #}
+                <div class="form-group mb-5">
+                    <h5 class="fw-light fs-3 mb-3">Название:</h5>
+                    <label for="surveyTitleInput" class="form-label">Введите название всего опроса</label>
+                    <div class="input-group">
+                        <input
+                                type="text"
+                                id="surveyTitleInput"
+                                placeholder="Название опроса"
+                                class="form-control"
+                                required
+                        >
+                    </div>
+                </div>
+
+                {# Вопросы #}
+                <div class="form-group mb-5">
+                    <h5 class="fw-light fs-3 mb-3">Вопросы:</h5>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success mb-3"
+                                data-toggle="modal"
+                                data-bs-toggle="modal"
+                                data-bs-target="#questionTypeModal"
+                                data-button-type="open-add-question-modal"
+                                type="button"
+                        >
+                            Добавить вопрос
+                        </button>
+                    </div>
+                </div>
+
+                {# Email участников опроса #}
+                <div class="form-group mb-5">
+                    <h5 class="fw-light fs-3 mb-3">Назначен:</h5>
+                    <div id="participantEmails">
+                        <label
+                                for="emailInput"
+                                data-span-type="placeholder"
+                                class="form-label"
+                        >
+                            Добавьте адреса email участников
+                        </label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" placeholder="Введите Email" id="emailInput" class="form-control mt-3">
+                        <button
+                                class="btn btn-outline-success mt-3"
+                                type="button"
+                                id="addParticipantEmailButton"
+                        >
+                            Добавить
+                        </button>
+                    </div>
+                </div>
+
+                {# Статус опроса #}
+                <div class="form-group mb-5">
+                    <h5 class="fw-light fs-3 mb-3">Статус:</h5>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="isAvailable">
+                        <label class="form-check-label" for="isAvailable">Доступен для прохождения</label>
+                    </div>
+                </div>
+
+                {# Сохранение опроса #}
+                <div class="form-group mb-5">
+                    <div class="d-grid gap-2">
+                        <button
+                                type="button"
+                                class="btn btn-success btn-lg"
+                                id="saveSurveyButton"
+                        >
+                            Сохранить опрос
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    {# Вариант ответа #}
+    <template id="questionOption">
+        <div class="input-group mb-3">
+            <input
+                    type="text"
+                    placeholder="Введите вариант ответа"
+                    class="form-control"
+                    data-input-type="question-option"
+                    required
+            >
+            <button class="btn btn-outline-danger" type="button" data-button-type="remove-question-option">
+                &times;
+            </button>
+        </div>
+    </template>
+
+    {# Вопрос со свободным ответом #}
+    <template id="textQuestion">
+        <div class="form-group mb-5" data-group-type="question">
+            <div class="input-group mb-3">
+                <div class="input-group-text">Свободный ответ</div>
+                <div class="input-group-text">
+                    <input
+                            class="form-check-input mt-0"
+                            type="checkbox"
+                            data-input-type="question-required"
+                    >
+                </div>
+                <input
+                        type="text"
+                        placeholder="Введите вопрос"
+                        class="form-control w-50"
+                        data-input-type="question-title"
+                        data-question-type="text"
+                >
+                <select class="form-select" data-select-type="validate-as">
+                    <option value="" disabled selected hidden>Тип ответа</option>
+                    <option value="email">Email</option>
+                    <option value="tel">Телефон</option>
+                    <option value="string">Строка</option>
+                </select>
+                <button class="btn btn-outline-danger" type="button" data-button-type="remove-question">&times;</button>
+            </div>
+        </div>
+    </template>
+
+    {# Вопрос с выбором одного ответа #}
+    <template id="radioQuestion">
+        <div class="form-group mb-5" data-group-type="question">
+            <div class="input-group mb-3">
+                <div class="input-group-text">Выбрать один</div>
+                <div class="input-group-text">
+                    <input class="form-check-input mt-0" type="checkbox" data-input-type="question-required">
+                </div>
+                <input
+                        type="text"
+                        placeholder="Введите вопрос"
+                        class="form-control"
+                        data-input-type="question-title"
+                        data-question-type="radio"
+                >
+                <button class="btn btn-outline-danger" type="button" data-button-type="remove-question">&times;</button>
+            </div>
+            <div class="ps-5">
+                <div class="input-group mb-3">
+                    <input
+                            type="text"
+                            placeholder="Введите вариант ответа"
+                            class="form-control"
+                            data-input-type="question-option"
+                    >
+                    <button class="btn btn-outline-danger" type="button" data-button-type="remove-question-option">
+                        &times;
+                    </button>
+                </div>
+                <div class="input-group mb-3">
+                    <input
+                            type="text"
+                            placeholder="Введите вариант ответа"
+                            class="form-control"
+                            data-input-type="question-option"
+                    >
+                    <button class="btn btn-outline-danger" type="button" data-button-type="remove-question-option">
+                        &times;
+                    </button>
+                </div>
+                <button
+                        class="btn btn-outline-primary"
+                        type="button"
+                        data-button-type="add-question-option"
+                >
+                    Добавить вариант ответа
+                </button>
+            </div>
+        </div>
+    </template>
+
+    {# Вопрос с выбором нескольких ответов #}
+    <template id="checkboxQuestion">
+        <div class="form-group mb-5" data-group-type="question">
+            <div class="input-group mb-3">
+                <div class="input-group-text">Выбрать несколько</div>
+                <div class="input-group-text">
+                    <input class="form-check-input mt-0" type="checkbox" data-input-type="question-required">
+                </div>
+                <input
+                        type="text"
+                        placeholder="Введите вопрос"
+                        class="form-control"
+                        data-input-type="question-title"
+                        data-question-type="checkbox"
+                >
+                <button class="btn btn-outline-danger" type="button" data-button-type="remove-question">&times;</button>
+            </div>
+            <div class="ps-5">
+                <div class="input-group mb-3">
+                    <input
+                            type="text"
+                            placeholder="Введите вариант ответа"
+                            class="form-control"
+                            data-input-type="question-option"
+                    >
+                    <button class="btn btn-outline-danger" type="button" data-button-type="remove-question-option">
+                        &times;
+                    </button>
+                </div>
+                <div class="input-group mb-3">
+                    <input
+                            type="text"
+                            placeholder="Введите вариант ответа"
+                            class="form-control"
+                            data-input-type="question-option"
+                    >
+                    <button class="btn btn-outline-danger" type="button" data-button-type="remove-question-option">
+                        &times;
+                    </button>
+                </div>
+                <button
+                        class="btn btn-outline-primary"
+                        type="button"
+                        data-button-type="add-question-option"
+                >
+                    Добавить вариант ответа
+                </button>
+            </div>
+        </div>
+    </template>
+
+    {# Тег с email #}
+    <template id="emailBadge">
+        <span class="badge badge-lg rounded-pill bg-primary email-badge m-1">
+            <span data-span-type="email"></span>
+            <button type="button" data-button-type="remove-email">&times;</button>
+        </span>
+    </template>
+
+    {# Заполнитель для поля с email #}
+    <template id="participantEmailsPlaceholder">
+        <label data-span-type="placeholder" for="emailInput">Добавьте адреса email участников</label>
+    </template>
+
+
+    {# Модальное окно с выбором типа нового вопроса #}
+    <div class="modal fade" id="questionTypeModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-light fs-4">Выберите тип вопроса</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-grid gap-2">
+                        <button
+                                class="btn btn-outline-primary mb-2"
+                                id="addTextQuestionBtn"
+                                type="button"
+                                data-bs-dismiss="modal"
+                                data-button-type="add-question"
+                                data-button-created-question-type="text"
+                        >
+                            Вопрос со свободным ответом
+                        </button>
+                        <button
+                                class="btn btn-outline-primary mb-2"
+                                id="addRadioQuestionBtn"
+                                type="button"
+                                data-bs-dismiss="modal"
+                                data-button-type="add-question"
+                                data-button-created-question-type="radio"
+                        >
+                            Вопрос с выбором одного ответа
+                        </button>
+                        <button
+                                class="btn btn-outline-primary"
+                                id="addCheckboxQuestionBtn"
+                                type="button"
+                                data-bs-dismiss="modal"
+                                data-button-type="add-question"
+                                data-button-created-question-type="checkbox"
+                        >
+                            Вопрос с выбором нескольких вариантов
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

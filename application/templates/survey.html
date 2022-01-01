@@ -1,0 +1,131 @@
+{% extends 'layout.html' %}
+
+{% set active_page = 'register' -%}
+
+{% block title %}Опрос{% endblock %}
+
+{% block body %}
+    {# Если пользователю назначен этот опрос #}
+    {% if session['allowed_survey'] == survey_id %}
+        <h1 class="display-4 mb-3"><small class="text-muted">Опрос:&nbsp;</small>{{ survey.title }}</h1>
+        <p class="lead">Обязательные поля опроса отмечены звездочкой</p>
+        <hr>
+
+        <div class="row">
+            <div class="col-8">
+                <form
+                        action=""
+                        method="POST"
+                        autocomplete="off"
+                        id="surveyForm"
+                        class="needs-validation"
+                        novalidate
+                >
+                    {% for question in survey.questions %}
+                        <div
+                                class="form-group mb-5"
+                                data-group-type="answer"
+                                data-question-type="{% if question.type in ['text', 'email', 'tel'] %}text{% else %}{{ question.type }}{% endif %}"
+                                data-question-required="{{ question.isRequired }}"
+                        >
+                            <label class="form-label fs-5" for="{{ question.id }}">
+                                <span>{{ loop.index }}.</span>
+                                <span data-span-type="question-title">{{ question.title }}</span>&nbsp;
+                                <span class="text-muted">({{ question.label }})</span>
+                                {% if question.isRequired %}&nbsp;
+                                    <span class="text-danger "><i class="fas fa-asterisk"></i></span>{% endif %}
+                            </label>
+
+                            {# Если вопрос со свободным ответом #}
+                            {% if question.type in ['text', 'email', 'tel'] %}
+                                <div class="input-group ps-5">
+                                    {% if question.type == 'tel' %}
+                                        <div class="input-group-text">+</div>
+                                    {% endif %}
+                                    <input
+                                            type="{{ question.type }}"
+                                            class="form-control"
+                                            {% if question.type == 'tel' %}pattern="{{ question.pattern }}"{% endif %}
+                                            {% if question.isRequired %}required{% endif %}
+                                            placeholder="{% if question.type == 'tel' %}0-123-456-7890{% elif question.type == 'email' %}name@email.com{% else %}Ваш ответ{% endif %}"
+                                            data-input-type="answer"
+                                            id="{{ question.id }}"
+                                    >
+                                </div>
+
+                                {# Если вопрос с выбором ответа #}
+                            {% elif question.type in ['radio', 'checkbox'] %}
+                                <fieldset
+                                        id="{{ question.id }}"
+                                        {% if question.type == 'checkbox' %}data-fieldset-type="checkbox-group"{% endif %}
+                                        {% if question.isRequired %}data-required{% endif %}
+                                        class="ps-5"
+                                >
+                                    {% for option in question.answerOptions %}
+                                        <div class="form-check mb-3">
+                                            <label class="form-check-label">
+                                                <input
+                                                        type="{{ question.type }}"
+                                                        class="form-check-input"
+                                                        {% if question.isRequired %}required{% endif %}
+                                                        name="{{ question.id }}"
+                                                        data-input-type="answer-option"
+                                                        value="{{ option }}"
+                                                >{{ option }}
+                                            </label>
+                                            <div class="invalid-feedback">{{ question.errorMessage }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </fieldset>
+                            {% endif %}
+
+                            <div class="invalid-feedback">{{ question.errorMessage }}</div>
+                        </div>
+                    {% endfor %}
+
+                    <div class="form-group mb-5">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" type="submit">Завершить опрос</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        {# Проверка, что пользователю назначен опрос #}
+    {% else %}
+        <div class="row d-flex justify-content-center mt-5">
+            <div class="col-6">
+                <div class="card">
+                    <form action="/survey-access" method="POST" autocomplete="off" class="needs-validation p-5"
+                          novalidate>
+                        <h1 class="display-6">Опрос</h1>
+                        <p class="lead">Введите ваш email для прохождения опроса</p>
+
+                        <label for="email" class="form-label">Email</label>
+                        <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                class="form-control"
+                                placeholder="Ваш email"
+                                required
+                        >
+                        <div class="invalid-feedback">Введите email</div>
+
+                        <input type="hidden" name="survey_id" value="{{ survey_id }}">
+
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary mt-4" type="submit">Пройти опрос</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+    {% endif %}
+
+{% endblock %}
